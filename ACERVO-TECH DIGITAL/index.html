@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login • AcervoTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="css/estilo.css" />
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-book-open login-icon"></i>
+                <h1>AcervoTech</h1>
+                <p>Acesse sua conta para continuar</p>
+            </div>
+            <form id="formLogin" class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="E-mail" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="senha" placeholder="Senha" required />
+                    <button type="button" class="toggle-password" onclick="toggleSenha()">
+                        <i class="fas fa-eye" id="iconeOlho"></i>
+                    </button>
+                </div>
+                <div class="login-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="lembrar" /> Lembrar-me
+                    </label>
+                    <a href="esqueci-senha.html" class="forgot-link">Esqueceu a senha?</a>
+                </div>
+                <button type="submit" class="btn-primary">Entrar</button>
+                <div id="mensagemErro" class="error-message"></div>
+            </form>
+            <div class="login-footer">
+                <span class="question">Ainda não tem uma conta?</span>
+                <a href="register.html" class="register-link">Cadastre-se agora</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleSenha() {
+            const campo = document.getElementById('senha');
+            const icone = document.getElementById('iconeOlho');
+            if (campo.type === 'password') {
+                campo.type = 'text';
+                icone.classList.remove('fa-eye');
+                icone.classList.add('fa-eye-slash');
+            } else {
+                campo.type = 'password';
+                icone.classList.remove('fa-eye-slash');
+                icone.classList.add('fa-eye');
+            }
+        }
+    </script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

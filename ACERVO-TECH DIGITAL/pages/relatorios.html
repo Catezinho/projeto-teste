@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - AcervoTech</title>
+    <link rel="stylesheet" href="../css/estilo.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">📚 AcervoTech</div>
+            <div class="menu">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="livros.html">Livros</a>
+                <a href="usuarios.html">Usuários</a>
+                <a href="emprestimos.html">Empréstimos</a>
+                <a href="devolucoes.html">Devoluções</a>
+                <a href="consultar.html">Consultar</a>
+                <a href="relatorios.html" class="ativo">Relatórios</a>
+            </div>
+            <div class="usuario">
+                <span id="nomeUsuario"></span>
+                <button onclick="logout()">Sair</button>
+            </div>
+        </nav>
+
+        <h2>Relatórios</h2>
+        <div class="card-grid">
+            <div class="card primary"><h3>Total Livros</h3><div class="numero" id="totalLivrosRel">0</div></div>
+            <div class="card success"><h3>Usuários Ativos</h3><div class="numero" id="totalUsuariosRel">0</div></div>
+            <div class="card warning"><h3>Empréstimos Ativos</h3><div class="numero" id="totalEmprestimosRel">0</div></div>
+            <div class="card danger"><h3>Indisponíveis</h3><div class="numero" id="totalIndisponiveisRel">0</div></div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin:20px 0;">
+            <button onclick="exportarCSV()" class="btn-primary" style="width:auto;">📄 Exportar CSV</button>
+            <button onclick="simularPDF()" class="btn-primary" style="width:auto; background:#6c757d;">📑 Simular PDF</button>
+            <button onclick="relatorioPendencias()" class="btn-primary" style="width:auto; background:#f9a825;">⚠️ Pendências</button>
+            <button onclick="relatorioGeral()" class="btn-primary" style="width:auto; background:#2e7d32;">📋 Relatório Geral</button>
+        </div>
+
+        <div id="areaRelatorio" style="background:white; padding:20px; border-radius:16px; margin-top:20px;">
+            Clique em um botão para gerar o relatório.
+        </div>
+    </div>
+
+    <script src="../js/dados.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function atualizarResumos() {
+            document.getElementById('totalLivrosRel').textContent = livros.length;
+            document.getElementById('totalUsuariosRel').textContent = usuarios.filter(u => u.ativo).length;
+            document.getElementById('totalEmprestimosRel').textContent = emprestimos.filter(e => e.status === 'ativo').length;
+            document.getElementById('totalIndisponiveisRel').textContent = livros.filter(l => l.disponiveis === 0).length;
+        }
+
+        function exportarCSV() {
+            let csv = "ID,Título,Autor,ISBN,Categoria,Exemplares,Disponíveis\n";
+            livros.forEach(l => {
+                csv += `${l.id},"${l.titulo}","${l.autor}","${l.isbn}","${l.categoria}",${l.exemplares},${l.disponiveis}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'relatorio_acervo.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            document.getElementById('areaRelatorio').innerHTML = '<p>✅ CSV baixado com sucesso!</p>';
+        }
+
+        function simularPDF() {
+            let html = '<h3>Simulação de PDF</h3><table class="tabela-wrapper"><thead><tr><th>ID</th><th>Título</th><th>Autor</th></tr></thead><tbody>';
+            livros.slice(0, 5).forEach(l => {
+                html += `<tr><td>${l.id}</td><td>${l.titulo}</td><td>${l.autor}</td></tr>`;
+            });
+            html += '</tbody></table><p><em>Exemplo dos 5 primeiros livros.</em></p>';
+            document.getElementById('areaRelatorio').innerHTML = html;
+        }
+
+        function relatorioPendencias() {
+            const hoje = new Date();
+            const atrasados = emprestimos.filter(e => e.status === 'ativo' && new Date(e.dataDevolucaoPrevista) < hoje);
+            if (atrasados.length === 0) {
+                document.getElementById('areaRelatorio').innerHTML = '<p>✅ Nenhuma pendência de atraso.</p>';
+                return;
+            }
+            let html = `<h3>⚠️ Pendências (${atrasados.length})</h3><ul>`;
+            atrasados.forEach(e => {
+                const usuario = usuarios.find(u => u.id === e.idUsuario);
+                const livro = livros.find(l => l.id === e.idLivro);
+                const dias = Math.ceil((hoje - new Date(e.dataDevolucaoPrevista)) / (1000*60*60*24));
+                html += `<li>${usuario?.nome || 'N/A'} - ${livro?.titulo || 'N/A'} (${dias} dias atrasado)</li>`;
+            });
+            html += '</ul>';
+            document.getElementById('areaRelatorio').innerHTML = html;
+        }
+
+        function relatorioGeral() {
+            const categorias = {};
+            livros.forEach(l => { categorias[l.categoria] = (categorias[l.categoria] || 0) + 1; });
+            let html = '<h3>📋 Relatório Geral</h3><ul>';
+            html += `<li>Total de livros: ${livros.length}</li>`;
+            html += `<li>Usuários ativos: ${usuarios.filter(u => u.ativo).length}</li>`;
+            html += `<li>Empréstimos ativos: ${emprestimos.filter(e => e.status === 'ativo').length}</li>`;
+            html += '<li>Distribuição por categoria: ';
+            for (let [cat, qtd] of Object.entries(categorias)) {
+                html += `${cat}: ${qtd} `;
+            }
+            html += '</li></ul>';
+            document.getElementById('areaRelatorio').innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarAutenticacao();
+            exibirUsuarioNoMenu();
+            atualizarResumos();
+        });
+    </script>
+</body>
+</html>

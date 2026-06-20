@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro • AcervoTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="css/estilo.css" />
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-user-plus login-icon"></i>
+                <h1>Criar conta</h1>
+                <p>Preencha os dados para se cadastrar</p>
+            </div>
+            <form id="formCadastro" class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="nomeCompleto" placeholder="Nome completo" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="emailCadastro" placeholder="E-mail" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="senhaCadastro" placeholder="Senha (mínimo 6 caracteres)" required minlength="6" />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-check-circle"></i>
+                    <input type="password" id="confirmarSenha" placeholder="Confirmar senha" required />
+                </div>
+                <button type="submit" class="btn-primary">Cadastrar</button>
+                <div id="mensagemCadastro" class="error-message"></div>
+            </form>
+            <div class="login-footer">
+                <span class="question">Já tem conta?</span>
+                <a href="index.html" class="register-link">Faça login</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('formCadastro').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nome = document.getElementById('nomeCompleto').value.trim();
+            const email = document.getElementById('emailCadastro').value.trim();
+            const senha = document.getElementById('senhaCadastro').value;
+            const confirmar = document.getElementById('confirmarSenha').value;
+            const msg = document.getElementById('mensagemCadastro');
+
+            if (senha !== confirmar) {
+                msg.textContent = 'As senhas não coincidem.';
+                msg.style.color = '#d32f2f';
+                return;
+            }
+            if (senha.length < 6) {
+                msg.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                msg.style.color = '#d32f2f';
+                return;
+            }
+
+            const usuarios = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
+            if (usuarios.some(u => u.email === email)) {
+                msg.textContent = 'Este e-mail já está cadastrado.';
+                msg.style.color = '#d32f2f';
+                return;
+            }
+            usuarios.push({ nome, email, senha });
+            localStorage.setItem('usuariosCadastrados', JSON.stringify(usuarios));
+            msg.textContent = 'Cadastro realizado! Redirecionando...';
+            msg.style.color = '#2e7d32';
+            setTimeout(() => window.location.href = 'index.html', 1500);
+        });
+    </script>
+</body>
+</html>

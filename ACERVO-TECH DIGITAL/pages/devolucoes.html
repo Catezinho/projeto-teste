@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devoluções - AcervoTech</title>
+    <link rel="stylesheet" href="../css/estilo.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">📚 AcervoTech</div>
+            <div class="menu">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="livros.html">Livros</a>
+                <a href="usuarios.html">Usuários</a>
+                <a href="emprestimos.html">Empréstimos</a>
+                <a href="devolucoes.html" class="ativo">Devoluções</a>
+                <a href="consultar.html">Consultar</a>
+                <a href="relatorios.html">Relatórios</a>
+            </div>
+            <div class="usuario">
+                <span id="nomeUsuario"></span>
+                <button onclick="logout()">Sair</button>
+            </div>
+        </nav>
+
+        <h2>Registrar Devolução</h2>
+        <div class="tabela-wrapper">
+            <table>
+                <thead><tr><th>ID</th><th>Livro</th><th>Usuário</th><th>Previsão</th><th>Status</th><th>Ação</th></tr></thead>
+                <tbody id="tabelaDevolucoes"></tbody>
+            </table>
+        </div>
+
+        <div id="detalhesMulta" style="display:none; margin-top:20px; background:white; padding:20px; border-radius:16px;">
+            <h3>Detalhes da Devolução</h3>
+            <div id="infoMulta"></div>
+            <button onclick="confirmarDevolucao()" class="btn-primary" style="width:auto;">Confirmar Devolução</button>
+            <button onclick="fecharDetalhesMulta()" style="background:#999; border:none; padding:10px 20px; border-radius:12px; color:white; cursor:pointer;">Cancelar</button>
+        </div>
+    </div>
+
+    <script src="../js/dados.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let emprestimoSelecionado = null;
+
+        function carregarDevolucoes() {
+            const tbody = document.getElementById('tabelaDevolucoes');
+            tbody.innerHTML = '';
+            const ativos = emprestimos.filter(e => e.status === 'ativo');
+            if (ativos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">Nenhum empréstimo ativo.</td></tr>';
+                return;
+            }
+            ativos.forEach(e => {
+                const livro = livros.find(l => l.id === e.idLivro);
+                const usuario = usuarios.find(u => u.id === e.idUsuario);
+                const hoje = new Date();
+                const previsao = new Date(e.dataDevolucaoPrevista);
+                const atrasado = hoje > previsao;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${e.id}</td>
+                    <td>${livro ? livro.titulo : 'N/A'}</td>
+                    <td>${usuario ? usuario.nome : 'N/A'}</td>
+                    <td>${e.dataDevolucaoPrevista}</td>
+                    <td><span class="status ${atrasado ? 'atrasado' : 'ativo'}">${atrasado ? 'Atrasado' : 'Em dia'}</span></td>
+                    <td><button onclick="prepararDevolucao(${e.id})" class="btn-primary" style="width:auto; padding:6px 16px;">Devolver</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function prepararDevolucao(id) {
+            const emprestimo = emprestimos.find(e => e.id === id);
+            if (!emprestimo) return;
+            emprestimoSelecionado = emprestimo;
+            const hoje = new Date();
+            const previsao = new Date(emprestimo.dataDevolucaoPrevista);
+            let multa = 0, dias = 0, msg = '✅ Em dia. Sem multa.';
+            if (hoje > previsao) {
+                dias = Math.ceil((hoje - previsao) / (1000*60*60*24));
+                multa = dias * 2.00;
+                msg = `⚠️ Atraso de ${dias} dias. Multa: R$ ${multa.toFixed(2)}`;
+            }
+            document.getElementById('infoMulta').innerHTML = `
+                <p><strong>Livro:</strong> ${livros.find(l => l.id === emprestimo.idLivro)?.titulo || 'N/A'}</p>
+                <p><strong>Usuário:</strong> ${usuarios.find(u => u.id === emprestimo.idUsuario)?.nome || 'N/A'}</p>
+                <p><strong>Previsão:</strong> ${emprestimo.dataDevolucaoPrevista}</p>
+                <hr>
+                <p>${msg}</p>
+                ${multa > 0 ? `<p style="color:red;">Valor a pagar: R$ ${multa.toFixed(2)}</p>` : ''}
+            `;
+            document.getElementById('detalhesMulta').style.display = 'block';
+        }
+
+        function fecharDetalhesMulta() {
+            document.getElementById('detalhesMulta').style.display = 'none';
+            emprestimoSelecionado = null;
+        }
+
+        function confirmarDevolucao() {
+            if (!emprestimoSelecionado) return;
+            const emprestimo = emprestimoSelecionado;
+            emprestimo.status = 'finalizado';
+            const livro = livros.find(l => l.id === emprestimo.idLivro);
+            if (livro) livro.disponiveis = Math.min(livro.disponiveis + 1, livro.exemplares);
+            fecharDetalhesMulta();
+            carregarDevolucoes();
+            alert('Devolução registrada com sucesso!');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarAutenticacao();
+            exibirUsuarioNoMenu();
+            carregarDevolucoes();
+        });
+    </script>
+</body>
+</html>

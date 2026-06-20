@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar - AcervoTech</title>
+    <link rel="stylesheet" href="../css/estilo.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">📚 AcervoTech</div>
+            <div class="menu">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="livros.html">Livros</a>
+                <a href="usuarios.html">Usuários</a>
+                <a href="emprestimos.html">Empréstimos</a>
+                <a href="devolucoes.html">Devoluções</a>
+                <a href="consultar.html" class="ativo">Consultar</a>
+                <a href="relatorios.html">Relatórios</a>
+            </div>
+            <div class="usuario">
+                <span id="nomeUsuario"></span>
+                <button onclick="logout()">Sair</button>
+            </div>
+        </nav>
+
+        <h2>Consultar Acervo</h2>
+        <div class="busca">
+            <input type="text" id="campoBusca" placeholder="Digite título ou autor...">
+            <button onclick="buscar()">Buscar</button>
+            <button onclick="limparBusca()" style="background:#999;">Limpar</button>
+        </div>
+        <div id="resultados"></div>
+    </div>
+
+    <script src="../js/dados.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function buscar() {
+            const termo = document.getElementById('campoBusca').value.trim().toLowerCase();
+            const container = document.getElementById('resultados');
+            if (!termo) {
+                container.innerHTML = '<p>Digite um termo para buscar.</p>';
+                return;
+            }
+            const resultados = livros.filter(l => 
+                l.titulo.toLowerCase().includes(termo) || 
+                l.autor.toLowerCase().includes(termo)
+            );
+            if (resultados.length === 0) {
+                container.innerHTML = `<p>Nenhum livro encontrado para "${termo}".</p>`;
+                return;
+            }
+            let html = `<h3>${resultados.length} resultado(s):</h3><div class="card-grid">`;
+            resultados.forEach(l => {
+                html += `
+                    <div class="card" style="text-align:left;">
+                        <h4>${l.titulo}</h4>
+                        <p><strong>Autor:</strong> ${l.autor}</p>
+                        <p><strong>ISBN:</strong> ${l.isbn}</p>
+                        <p><strong>Categoria:</strong> ${l.categoria}</p>
+                        <p><strong>Disponíveis:</strong> ${l.disponiveis} / ${l.exemplares}</p>
+                        <p>${l.disponiveis > 0 ? '✅ Disponível' : '❌ Indisponível'}</p>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function limparBusca() {
+            document.getElementById('campoBusca').value = '';
+            document.getElementById('resultados').innerHTML = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarAutenticacao();
+            exibirUsuarioNoMenu();
+            document.getElementById('campoBusca').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') buscar();
+            });
+        });
+    </script>
+</body>
+</html>

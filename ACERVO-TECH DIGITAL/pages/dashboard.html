@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AcervoTech</title>
+    <link rel="stylesheet" href="../css/estilo.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">📚 AcervoTech</div>
+            <div class="menu">
+                <a href="dashboard.html" class="ativo">Dashboard</a>
+                <a href="livros.html">Livros</a>
+                <a href="usuarios.html">Usuários</a>
+                <a href="emprestimos.html">Empréstimos</a>
+                <a href="devolucoes.html">Devoluções</a>
+                <a href="consultar.html">Consultar</a>
+                <a href="relatorios.html">Relatórios</a>
+            </div>
+            <div class="usuario">
+                <span id="nomeUsuario"></span>
+                <button onclick="logout()">Sair</button>
+            </div>
+        </nav>
+
+        <h2>Dashboard</h2>
+        <div class="card-grid">
+            <div class="card primary"><h3>Total Livros</h3><div class="numero" id="totalLivros">0</div></div>
+            <div class="card success"><h3>Usuários Ativos</h3><div class="numero" id="totalUsuarios">0</div></div>
+            <div class="card warning"><h3>Empréstimos Ativos</h3><div class="numero" id="totalEmprestimos">0</div></div>
+            <div class="card danger"><h3>Indisponíveis</h3><div class="numero" id="totalIndisponiveis">0</div></div>
+        </div>
+
+        <div id="areaAdmin" style="display:none;" class="alert">🔒 Administrador – acesso total.</div>
+        <div id="areaVisitante" style="display:none;" class="alert">👤 Visitante – apenas consulta.</div>
+    </div>
+
+    <script src="../js/dados.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usuario = verificarAutenticacao();
+            exibirUsuarioNoMenu();
+            if (usuario.perfil === 'administrador') {
+                document.getElementById('areaAdmin').style.display = 'block';
+            } else {
+                document.getElementById('areaVisitante').style.display = 'block';
+            }
+            document.getElementById('totalLivros').textContent = livros.length;
+            document.getElementById('totalUsuarios').textContent = usuarios.filter(u => u.ativo).length;
+            document.getElementById('totalEmprestimos').textContent = emprestimos.filter(e => e.status === 'ativo').length;
+            document.getElementById('totalIndisponiveis').textContent = livros.filter(l => l.disponiveis === 0).length;
+        });
+    </script>
+</body>
+</html>

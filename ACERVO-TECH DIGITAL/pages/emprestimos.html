@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empréstimos - AcervoTech</title>
+    <link rel="stylesheet" href="../css/estilo.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">📚 AcervoTech</div>
+            <div class="menu">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="livros.html">Livros</a>
+                <a href="usuarios.html">Usuários</a>
+                <a href="emprestimos.html" class="ativo">Empréstimos</a>
+                <a href="devolucoes.html">Devoluções</a>
+                <a href="consultar.html">Consultar</a>
+                <a href="relatorios.html">Relatórios</a>
+            </div>
+            <div class="usuario">
+                <span id="nomeUsuario"></span>
+                <button onclick="logout()">Sair</button>
+            </div>
+        </nav>
+
+        <h2>Registrar Empréstimo</h2>
+        <button onclick="abrirFormEmprestimo()" class="btn-primary" style="width:auto; margin-bottom:16px;">+ Novo Empréstimo</button>
+
+        <div class="tabela-wrapper">
+            <table>
+                <thead><tr><th>ID</th><th>Livro</th><th>Usuário</th><th>Data Empréstimo</th><th>Previsão</th><th>Status</th></tr></thead>
+                <tbody id="tabelaEmprestimos"></tbody>
+            </table>
+        </div>
+
+        <div id="formEmprestimoContainer" style="display:none; margin-top:20px;">
+            <div class="form-padrao">
+                <h3>Novo Empréstimo</h3>
+                <form id="formEmprestimo">
+                    <div class="campo"><label>Livro</label><select id="idLivro" required></select></div>
+                    <div class="campo"><label>Usuário</label><select id="idUsuario" required></select></div>
+                    <div class="campo"><label>Data prevista devolução</label><input type="date" id="dataDevolucao" required></div>
+                    <button type="submit">Registrar</button>
+                    <button type="button" onclick="fecharFormEmprestimo()" style="background:#999; margin-top:10px;">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/dados.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/emprestimos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarAutenticacao();
+            exibirUsuarioNoMenu();
+            carregarTabelaEmprestimos();
+            carregarSelects();
+        });
+    </script>
+</body>
+</html>
